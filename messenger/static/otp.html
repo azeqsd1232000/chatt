@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ChatApp - Vérification</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --primary-dark: #3a0ca3;
+            --secondary: #3f37c9;
+            --error: #f72585;
+            --success: #4cc9f0;
+            --warning: #f8961e;
+            --gray: #adb5bd;
+            --gray-light: #e9ecef;
+            --light: #f8f9fa;
+            --dark: #2b2d42;
+            --darker: #1a1a2e;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            color: var(--dark);
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 480px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transform: translateY(20px);
+            opacity: 0;
+            animation: fadeInUp 0.6s forwards 0.3s;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 25px;
+                border-radius: 16px;
+            }
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light), var(--primary-dark));
+            animation: progress 3s ease-in-out infinite;
+            background-size: 200% 100%;
+        }
+        
+        .logo-container {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .logo {
+            width: 70px;
+            height: 70px;
+            object-fit: contain;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 4px 8px rgba(67, 97, 238, 0.15));
+            transition: transform 0.3s ease;
+        }
+        
+        .logo:hover {
+            transform: scale(1.05);
+        }
+        
+        .logo-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, rgba(67, 97, 238, 0.1), rgba(73, 146, 239, 0.1));
+            border-radius: 50%;
+            z-index: -1;
+        }
+        
+        h1 {
+            font-size: 26px;
+            margin-bottom: 12px;
+            color: var(--darker);
+            font-weight: 600;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            display: inline-block;
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 24px;
+            }
+        }
+        
+        p {
+            color: var(--gray);
+            margin-bottom: 30px;
+            line-height: 1.6;
+            font-size: 15px;
+        }
+        
+        @media (max-width: 480px) {
+            p {
+                font-size: 14px;
+                margin-bottom: 25px;
+            }
+        }
+        
+        .code-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            position: relative;
+            gap: 12px;
+        }
+        
+        @media (max-width: 480px) {
+            .code-container {
+                gap: 10px;
+                margin-bottom: 25px;
+            }
+        }
+        
+        .code-input {
+            width: 100%;
+            height: 65px;
+            text-align: center;
+            font-size: 26px;
+            font-weight: 500;
+            border: 2px solid var(--gray-light);
+            border-radius: 12px;
+            outline: none;
+            transition: all 0.3s ease;
+            background-color: var(--light);
+            color: var(--primary-dark);
+            -webkit-appearance: none;
+            flex: 1;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        @media (max-width: 480px) {
+            .code-input {
+                height: 60px;
+                font-size: 24px;
+                border-radius: 10px;
+            }
+        }
+        
+        .code-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.2), inset 0 1px 2px rgba(0, 0, 0, 0.05);
+            transform: translateY(-3px);
+        }
+        
+        .code-input.filled {
+            animation: bounce 0.4s;
+            border-color: var(--primary-light);
+            background-color: rgba(72, 149, 239, 0.05);
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 16px 24px;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 12px rgba(67, 97, 238, 0.2);
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.5px;
+        }
+        
+        @media (max-width: 480px) {
+            .btn {
+                padding: 15px 24px;
+                font-size: 16px;
+                border-radius: 10px;
+            }
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(67, 97, 238, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn.loading {
+            pointer-events: none;
+            opacity: 0.9;
+        }
+        
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.4), transparent);
+            transform: translateX(-100%);
+        }
+        
+        .btn:hover::after {
+            animation: shine 1.5s infinite;
+        }
+        
+        .btn-success {
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+            box-shadow: 0 6px 12px rgba(46, 204, 113, 0.3);
+        }
+        
+        .btn-error {
+            background: linear-gradient(45deg, var(--error), #d0006f);
+            box-shadow: 0 6px 12px rgba(247, 37, 133, 0.3);
+        }
+        
+        .resend {
+            margin-top: 25px;
+            color: var(--gray);
+            font-size: 15px;
+        }
+        
+        @media (max-width: 480px) {
+            .resend {
+                font-size: 14px;
+                margin-top: 20px;
+            }
+        }
+        
+        .resend a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .resend a:hover {
+            color: var(--primary-dark);
+        }
+        
+        .resend a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+        
+        .resend a:hover::after {
+            width: 100%;
+        }
+        
+        .message {
+            margin-bottom: 20px;
+            font-size: 14px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .error {
+            color: var(--error);
+            animation: shake 0.5s;
+        }
+        
+        .success {
+            color: var(--success);
+        }
+        
+        .warning {
+            color: var(--warning);
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+        
+        @keyframes shake {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            10%, 30%, 50%, 70%, 90% {
+                transform: translateX(-5px);
+            }
+            20%, 40%, 60%, 80% {
+                transform: translateX(5px);
+            }
+        }
+        
+        @keyframes progress {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        
+        @keyframes shine {
+            100% {
+                transform: translateX(100%);
+            }
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(0.95);
+                opacity: 0.8;
+            }
+            50% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0.95);
+                opacity: 0.8;
+            }
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        /* Optimisation pour mobile */
+        @media (max-height: 600px) {
+            .container {
+                margin: 10px 0;
+                padding: 25px 20px;
+            }
+            
+            .code-input {
+                height: 55px;
+                font-size: 22px;
+            }
+            
+            h1 {
+                font-size: 22px;
+                margin-bottom: 10px;
+            }
+            
+            p {
+                margin-bottom: 20px;
+                font-size: 14px;
+            }
+            
+            .btn {
+                padding: 14px 20px;
+                font-size: 15px;
+            }
+        }
+        
+        /* Empêcher le zoom sur iOS */
+        input, textarea, select {
+            font-size: 16px !important;
+        }
+        
+        @media screen and (-webkit-min-device-pixel-ratio:0) {
+            select:focus, textarea:focus, input:focus {
+                font-size: 16px !important;
+                background: #eee;
+            }
+        }
+        
+        /* Effet de flottement pour le logo */
+        .logo-float {
+            animation: float 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo-container">
+            <div class="logo-circle"></div>
+            <img src="static/CH.png" alt="ChatApp Logo" class="logo logo-float">
+        </div>
+        <h1>Vérification du code</h1>
+        <p>Nous avons envoyé un code à 5 chiffres à votre adresse email. Veuillez le saisir ci-dessous pour vérifier votre compte.</p>
+        
+        <form id="verificationForm">
+            <div class="code-container">
+                <input type="text" class="code-input" maxlength="1" pattern="[0-9]" required inputmode="numeric">
+                <input type="text" class="code-input" maxlength="1" pattern="[0-9]" required inputmode="numeric">
+                <input type="text" class="code-input" maxlength="1" pattern="[0-9]" required inputmode="numeric">
+                <input type="text" class="code-input" maxlength="1" pattern="[0-9]" required inputmode="numeric">
+                <input type="text" class="code-input" maxlength="1" pattern="[0-9]" required inputmode="numeric">
+            </div>
+            
+            <div id="errorMessage" class="message error" style="display: none;">
+                <i class="fas fa-exclamation-circle"></i>
+                <span class="message-text"></span>
+            </div>
+            <div id="successMessage" class="message success" style="display: none;">
+                <i class="fas fa-check-circle"></i>
+                <span class="message-text"></span>
+            </div>
+            
+            <button type="submit" class="btn" id="submitBtn">
+                <span id="btnText">Vérifier</span>
+                <i class="fas fa-spinner fa-spin" id="spinner" style="display: none; margin-left: 8px;"></i>
+            </button>
+        </form>
+        
+        <div class="resend">
+            Vous n'avez pas reçu de code ? <a href="#" id="resendLink">Renvoyer le code</a>
+        </div>
+    </div>
+
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const inputs = document.querySelectorAll('.code-input');
+    const form = document.getElementById('verificationForm');
+    const errorMessage = document.getElementById('errorMessage');
+    const errorMessageText = errorMessage.querySelector('.message-text');
+    const successMessage = document.getElementById('successMessage');
+    const successMessageText = successMessage.querySelector('.message-text');
+    const resendLink = document.getElementById('resendLink');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    const spinner = document.getElementById('spinner');
+
+    // Empêcher le zoom sur iOS
+    document.addEventListener('touchstart', function() {}, {passive: true});
+
+    // Ajuster la hauteur pour mobile
+    function adjustHeight() {
+        const vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+    window.addEventListener('resize', adjustHeight);
+    adjustHeight();
+
+    // Animation d'entrée pour chaque champ de code
+    inputs.forEach((input, index) => {
+        input.style.opacity = '0';
+        input.style.transform = 'translateY(10px)';
+        input.style.animation = `fadeInUp 0.4s forwards ${index * 0.1 + 0.6}s`;
+    });
+
+    // Gestion de la saisie du code
+    inputs.forEach((input, index) => {
+        input.addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            if (this.value.length === 1) {
+                this.classList.add('filled');
+                setTimeout(() => this.classList.remove('filled'), 400);
+                if (index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                } else {
+                    this.blur();
+                }
+            }
+        });
+
+        // Gestion du copier-coller
+        input.addEventListener('paste', function(e) {
+            e.preventDefault();
+            const paste = (e.clipboardData || window.clipboardData).getData('text');
+            const numbers = paste.replace(/[^0-9]/g, '');
+            if (numbers.length >= 5) {
+                for (let i = 0; i < 5; i++) {
+                    if (inputs[i]) {
+                        inputs[i].value = numbers[i] || '';
+                        inputs[i].classList.add('filled');
+                        setTimeout(() => inputs[i].classList.remove('filled'), 400);
+                    }
+                }
+                if (inputs[4]) inputs[4].focus();
+            }
+        });
+
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Backspace' && this.value.length === 0) {
+                if (index > 0) {
+                    inputs[index - 1].focus();
+                }
+            }
+        });
+
+        input.addEventListener('focus', function() {
+            this.setAttribute('inputmode', 'numeric');
+        });
+    });
+
+    // Récupérer l'email depuis l'URL
+    function getEmailFromURL() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('email') || '';
+    }
+
+    // Validation du formulaire et appel backend pour vérifier le code OTP
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        let code = '';
+        let isValid = true;
+
+        inputs.forEach(input => {
+            code += input.value;
+            if (!input.value) {
+                isValid = false;
+            }
+        });
+
+        if (!isValid) {
+            errorMessageText.textContent = 'Veuillez saisir le code complet à 5 chiffres.';
+            errorMessage.style.display = 'flex';
+            successMessage.style.display = 'none';
+            for (let i = 0; i < inputs.length; i++) {
+                if (!inputs[i].value) {
+                    inputs[i].focus();
+                    break;
+                }
+            }
+            return;
+        }
+
+        if (code.length !== 5) {
+            errorMessageText.textContent = 'Le code doit comporter exactement 5 chiffres.';
+            errorMessage.style.display = 'flex';
+            successMessage.style.display = 'none';
+            return;
+        }
+
+        errorMessage.style.display = 'none';
+        submitBtn.classList.add('loading');
+        btnText.textContent = 'Vérification...';
+        spinner.style.display = 'inline-block';
+
+        // Appel backend pour vérifier l'OTP
+        try {
+            const email = getEmailFromURL();
+            const res = await fetch(`auth/verify-otp/${encodeURIComponent(email)}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ otp: code })
+            });
+            const data = await res.json();
+            if (data.success) {
+                successMessageText.textContent = 'Code vérifié avec succès! Redirection en cours...';
+                successMessage.style.display = 'flex';
+                submitBtn.classList.add('btn-success');
+                btnText.textContent = 'Réussi!';
+                spinner.style.display = 'none';
+                setTimeout(() => {
+                    window.location.href = '/reset-password?email=' + encodeURIComponent(email); // Redirection après succès
+                }, 1500);
+            } else {
+                errorMessageText.textContent = data.message || "Code incorrect ou expiré.";
+                errorMessage.style.display = 'flex';
+                successMessage.style.display = 'none';
+                submitBtn.classList.remove('loading');
+                btnText.textContent = 'Vérifier';
+                spinner.style.display = 'none';
+                
+                // Animation d'erreur sur les champs
+                inputs.forEach(input => {
+                    input.style.borderColor = 'var(--error)';
+                    setTimeout(() => {
+                        input.style.borderColor = '';
+                    }, 1000);
+                });
+            }
+        } catch (err) {
+            errorMessageText.textContent = "Erreur réseau ou serveur.";
+            errorMessage.style.display = 'flex';
+            successMessage.style.display = 'none';
+            submitBtn.classList.remove('loading');
+            btnText.textContent = 'Vérifier';
+            spinner.style.display = 'none';
+        }
+    });
+
+    // Renvoi du code OTP
+    resendLink.addEventListener('click', async function(e) {
+        e.preventDefault();
+        const originalText = resendLink.textContent;
+        resendLink.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi...';
+        errorMessage.style.display = 'none';
+        successMessage.style.display = 'none';
+
+        try {
+            const email = getEmailFromURL();
+            const res = await fetch('/verify-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+            const data = await res.json();
+            if (data.success) {
+                successMessageText.textContent = 'Un nouveau code a été envoyé à votre adresse email.';
+                successMessage.style.display = 'flex';
+                errorMessage.style.display = 'none';
+                inputs.forEach(input => { input.value = ''; });
+                inputs[0].focus();
+                setTimeout(() => { successMessage.style.display = 'none'; }, 3000);
+            } else {
+                errorMessageText.textContent = data.message || "Erreur lors de l'envoi du code.";
+                errorMessage.style.display = 'flex';
+                successMessage.style.display = 'none';
+            }
+        } catch (err) {
+            errorMessageText.textContent = "Erreur réseau ou serveur.";
+            errorMessage.style.display = 'flex';
+            successMessage.style.display = 'none';
+        }
+        resendLink.textContent = originalText;
+    });
+});
+    </script>
+</body>
+</html>

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeu de Dames</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .game-container {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+        }
+        
+        .board {
+            display: grid;
+            grid-template-columns: repeat(8, 60px);
+            grid-template-rows: repeat(8, 60px);
+            border: 3px solid #333;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .cell {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .light {
+            background-color: #f0d9b5;
+        }
+        
+        .dark {
+            background-color: #b58863;
+        }
+        
+        .piece {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            position: relative;
+            z-index: 1;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .piece:hover {
+            transform: scale(1.1);
+        }
+        
+        .white {
+            background-color: #fff;
+            border: 2px solid #ddd;
+        }
+        
+        .black {
+            background-color: #333;
+            border: 2px solid #111;
+        }
+        
+        .king::after {
+            content: "♔";
+            position: absolute;
+            font-size: 20px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .white.king::after {
+            color: #333;
+        }
+        
+        .black.king::after {
+            color: #fff;
+        }
+        
+        .selected {
+            box-shadow: 0 0 10px 5px rgba(255, 215, 0, 0.7);
+        }
+        
+        .possible-move {
+            box-shadow: 0 0 10px 3px rgba(0, 255, 0, 0.5) inset;
+        }
+        
+        .capture-move {
+            box-shadow: 0 0 10px 3px rgba(255, 0, 0, 0.5) inset;
+        }
+        
+        .info-panel {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            min-width: 200px;
+        }
+        
+        .turn-indicator {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .white-turn {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        
+        .black-turn {
+            background-color: #333;
+            color: white;
+        }
+        
+        .score {
+            margin-top: 20px;
+            font-size: 16px;
+        }
+        
+        .controls {
+            margin-top: 20px;
+        }
+        
+        button {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Jeu de Dames</h1>
+    
+    <div class="game-container">
+        <div class="board" id="board"></div>
+        
+        <div class="info-panel">
+            <div class="turn-indicator white-turn" id="turn-indicator">Tour des Blancs</div>
+            <div class="score">
+                <p>Blancs: <span id="white-score">12</span> pièces</p>
+                <p>Noirs: <span id="black-score">12</span> pièces</p>
+            </div>
+            <div class="controls">
+                <button id="new-game">Nouvelle partie</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const board = document.getElementById('board');
+            const turnIndicator = document.getElementById('turn-indicator');
+            const whiteScoreDisplay = document.getElementById('white-score');
+            const blackScoreDisplay = document.getElementById('black-score');
+            const newGameBtn = document.getElementById('new-game');
+            
+            let gameState = [];
+            let currentPlayer = 'white';
+            let selectedPiece = null;
+            let possibleMoves = [];
+            let whitePieces = 12;
+            let blackPieces = 12;
+            
+            // Initialiser le plateau
+            function initializeBoard() {
+                board.innerHTML = '';
+                gameState = Array(8).fill().map(() => Array(8).fill(null));
+                
+                // Placer les pièces noires
+                for (let row = 0; row < 3; row++) {
+                    for (let col = (row % 2) ? 0 : 1; col < 8; col += 2) {
+                        gameState[row][col] = { color: 'black', king: false };
+                    }
+                }
+                
+                // Placer les pièces blanches
+                for (let row = 5; row < 8; row++) {
+                    for (let col = (row % 2) ? 0 : 1; col < 8; col += 2) {
+                        gameState[row][col] = { color: 'white', king: false };
+                    }
+                }
+                
+                // Mettre à jour l'affichage
+                updateBoard();
+                updateScores();
+                updateTurnIndicator();
+            }
+            
+            // Mettre à jour l'affichage du plateau
+            function updateBoard() {
+                board.innerHTML = '';
+                
+                for (let row = 0; row < 8; row++) {
+                    for (let col = 0; col < 8; col++) {
+                        const cell = document.createElement('div');
+                        cell.className = `cell ${(row + col) % 2 === 0 ? 'light' : 'dark'}`;
+                        cell.dataset.row = row;
+                        cell.dataset.col = col;
+                        
+                        if (gameState[row][col]) {
+                            const piece = document.createElement('div');
+                            piece.className = `piece ${gameState[row][col].color} ${gameState[row][col].king ? 'king' : ''}`;
+                            piece.dataset.row = row;
+                            piece.dataset.col = col;
+                            cell.appendChild(piece);
+                            
+                            // Marquer la pièce sélectionnée
+                            if (selectedPiece && selectedPiece.row === row && selectedPiece.col === col) {
+                                piece.classList.add('selected');
+                            }
+                        }
+                        
+                        // Marquer les mouvements possibles
+                        const move = possibleMoves.find(m => m.to.row === row && m.to.col === col);
+                        if (move) {
+                            cell.classList.add(move.capture ? 'capture-move' : 'possible-move');
+                        }
+                        
+                        cell.addEventListener('click', () => handleCellClick(row, col));
+                        board.appendChild(cell);
+                    }
+                }
+            }
+            
+            // Gérer le clic sur une case
+            function handleCellClick(row, col) {
+                const piece = gameState[row][col];
+                
+                // Si c'est une pièce du joueur courant, la sélectionner
+                if (piece && piece.color === currentPlayer) {
+                    selectedPiece = { row, col };
+                    possibleMoves = getPossibleMoves(row, col);
+                    updateBoard();
+                    return;
+                }
+                
+                // Si une pièce est sélectionnée, essayer de bouger
+                if (selectedPiece) {
+                    const move = possibleMoves.find(m => m.to.row === row && m.to.col === col);
+                    if (move) {
+                        movePiece(selectedPiece.row, selectedPiece.col, row, col, move.capture);
+                        
+                        // Si capture et qu'un autre capture est possible, garder la pièce sélectionnée
+                        if (move.capture) {
+                            const newMoves = getPossibleMoves(row, col).filter(m => m.capture);
+                            if (newMoves.length > 0) {
+                                selectedPiece = { row, col };
+                                possibleMoves = newMoves;
+                                updateBoard();
+                                return;
+                            }
+                        }
+                        
+                        selectedPiece = null;
+                        possibleMoves = [];
+                        currentPlayer = currentPlayer === 'white' ? 'black' : 'white';
+                        updateTurnIndicator();
+                    }
+                    
+                    updateBoard();
+                }
+            }
+            
+            // Obtenir les mouvements possibles pour une pièce
+            function getPossibleMoves(row, col) {
+                const piece = gameState[row][col];
+                if (!piece) return [];
+                
+                const moves = [];
+                const directions = piece.king ? 
+                    [{row: -1, col: -1}, {row: -1, col: 1}, {row: 1, col: -1}, {row: 1, col: 1}] :
+                    piece.color === 'white' ? 
+                        [{row: -1, col: -1}, {row: -1, col: 1}] : 
+                        [{row: 1, col: -1}, {row: 1, col: 1}];
+                
+                // Vérifier les captures obligatoires
+                let captureFound = false;
+                
+                for (const dir of directions) {
+                    const newRow = row + dir.row;
+                    const newCol = col + dir.col;
+                    
+                    if (isValidPosition(newRow, newCol)) {
+                        const target = gameState[newRow][newCol];
+                        
+                        if (target && target.color !== piece.color) {
+                            const jumpRow = newRow + dir.row;
+                            const jumpCol = newCol + dir.col;
+                            
+                            if (isValidPosition(jumpRow, jumpCol) && !gameState[jumpRow][jumpCol]) {
+                                captureFound = true;
+                                moves.push({
+                                    to: { row: jumpRow, col: jumpCol },
+                                    capture: { row: newRow, col: newCol }
+                                });
+                            }
+                        }
+                    }
+                }
+                
+                // Si des captures sont possibles, on ne retourne que celles-ci
+                if (captureFound) {
+                    return moves;
+                }
+                
+                // Sinon, vérifier les mouvements simples
+                for (const dir of directions) {
+                    const newRow = row + dir.row;
+                    const newCol = col + dir.col;
+                    
+                    if (isValidPosition(newRow, newCol) && !gameState[newRow][newCol]) {
+                        moves.push({
+                            to: { row: newRow, col: newCol },
+                            capture: null
+                        });
+                    }
+                }
+                
+                return moves;
+            }
+            
+            // Vérifier si une position est valide
+            function isValidPosition(row, col) {
+                return row >= 0 && row < 8 && col >= 0 && col < 8;
+            }
+            
+            // Déplacer une pièce
+            function movePiece(fromRow, fromCol, toRow, toCol, capture) {
+                const piece = gameState[fromRow][fromCol];
+                gameState[fromRow][fromCol] = null;
+                gameState[toRow][toCol] = piece;
+                
+                // Gérer la capture
+                if (capture) {
+                    gameState[capture.row][capture.col] = null;
+                    if (currentPlayer === 'white') {
+                        blackPieces--;
+                    } else {
+                        whitePieces--;
+                    }
+                    updateScores();
+                }
+                
+                // Vérifier la promotion en dame
+                if ((piece.color === 'white' && toRow === 0) || (piece.color === 'black' && toRow === 7)) {
+                    piece.king = true;
+                }
+            }
+            
+            // Mettre à jour l'indicateur de tour
+            function updateTurnIndicator() {
+                turnIndicator.textContent = currentPlayer === 'white' ? 'Tour des Blancs' : 'Tour des Noirs';
+                turnIndicator.className = `turn-indicator ${currentPlayer}-turn`;
+            }
+            
+            // Mettre à jour les scores
+            function updateScores() {
+                whiteScoreDisplay.textContent = whitePieces;
+                blackScoreDisplay.textContent = blackPieces;
+            }
+            
+            // Nouvelle partie
+            function newGame() {
+                currentPlayer = 'white';
+                selectedPiece = null;
+                possibleMoves = [];
+                whitePieces = 12;
+                blackPieces = 12;
+                initializeBoard();
+            }
+            
+            // Événements
+            newGameBtn.addEventListener('click', newGame);
+            
+            // Démarrer le jeu
+            newGame();
+        });
+    </script>
+</body>
+</html>
