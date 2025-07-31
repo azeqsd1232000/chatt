@@ -2,6 +2,7 @@ import httpx
 import random
 from manager.manager import manager
 from database import db
+from model import user_dict
 import hashlib
 
 #la fonction pour envoyer un email de bienvenue a l'utilsateur

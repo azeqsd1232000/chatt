@@ -309,7 +309,7 @@
                     submitBtn.style.background = "#4CAF50"; /* Vert pour le succès */
 
                     setTimeout(() => {
-                        window.location.href = "auth/login"; /* Redirection vers la page de connexion */
+                        window.location.href = "/login"; /* Redirection vers la page de connexion */
                     }, 1500);
                 } else {
                     submitBtn.innerHTML = `<span>${data.message || "Erreur d'inscription"}</span>`;
